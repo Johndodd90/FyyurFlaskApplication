@@ -1,6 +1,8 @@
 {% extends 'layouts/main.html' %}
 {% block title %}{{ artist.name }} | Artist{% endblock %}
 {% block content %}
+
+{% for artist in artist %}
 <div class="row">
 	<div class="col-sm-6">
 		<h1 class="monospace">
@@ -71,6 +73,6 @@
 		{% endfor %}
 	</div>
 </section>
-
+{% endfor %}
 {% endblock %}
 

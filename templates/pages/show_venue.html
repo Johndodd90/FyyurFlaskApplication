@@ -1,6 +1,9 @@
 {% extends 'layouts/main.html' %}
 {% block title %}Venue Search{% endblock %}
 {% block content %}
+
+{% for venue in data %}
+
 <div class="row">
 	<div class="col-sm-6">
 		<h1 class="monospace">
@@ -10,6 +13,7 @@
 			ID: {{ venue.id }}
 		</p>
 		<div class="genres">
+			
 			{% for genre in venue.genres %}
 			<span class="genre">{{ genre }}</span>
 			{% endfor %}
@@ -74,6 +78,9 @@
 		{% endfor %}
 	</div>
 </section>
+
+
+ {% endfor %}
 
 {% endblock %}
 
