@@ -38,15 +38,17 @@ class Venue(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
+    genres = db.Column(db.String(120))
+    address = db.Column(db.String(120))
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
-    address = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
     website_link = db.Column(db.String(500))
-    image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    seeking_artists = db.Column(db.Boolean(120))
+    seeking_artists = db.Column(
+        db.Boolean, default=False, nullable=False)
+    seeking_description = db.Column(db.String(500))
+    image_link = db.Column(db.String(500))
     shows_booked = db.relationship('Show', backref='venueShow', lazy=True)
 
     # TODO: implement any missing fields, as a database migration using Flask-Migrate
@@ -58,14 +60,16 @@ class Artist(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
+    genres = db.Column(db.String(120))
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
-    genres = db.Column(db.String(120))
     website_link = db.Column(db.String(500))
+    seeking_venue = db.Column(
+        db.Boolean, default=False, nullable=False)
+    seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    seeking_venue = db.Column(db.Boolean(120))
     shows_booked = db.relationship('Show', backref='artistShow', lazy=True)
 
 
@@ -155,9 +159,17 @@ def create_venue_submission():
     phone = request.form.get('phone', '')
     genres = request.form.get('genres', '')
     facebook_link = request.form.get('facebook_link', '')
+    website_link = request.form.get('website_link', '')
+    seeking_artists = request.form.get('seeking_artists', '')
+    seeking_description = request.form.get('seeking_description', '')
+    image_link = request.form.get('image_link ', '')
+
+    # Need to add seeking_artists below
 
     venue = Venue(name=name, city=city, state=state, phone=phone,
-                  address=address, genres=genres, facebook_link=facebook_link)
+                  address=address, genres=genres, facebook_link=facebook_link,
+                  website_link=website_link,
+                  seeking_description=seeking_description, image_link=image_link)
 
     try:
         db.session.add(venue)
@@ -323,9 +335,25 @@ def create_artist_submission():
     phone = request.form.get('phone', '')
     genres = request.form.get('genres', '')
     facebook_link = request.form.get('facebook_link', '')
+    website_link = request.form.get('website_link', '')
+    seeking_venue = request.form.get('seeking_venue', '')
+    seeking_description = request.form.get('seeking_description', '')
+    image_link = request.form.get('image_link', '')
 
-    artist = Artist(name=name, city=city, state=state, phone=phone,
-                    genres=genres, facebook_link=facebook_link)
+    print('name: ' + name)
+    print('city: ' + city)
+    print('state: ' + state)
+    print('phone: ' + phone)
+    print('genres: ' + genres)
+    print('facebook_link: ' + facebook_link)
+    print('website_link: ' + website_link)
+    print('seeking_venue: ' + seeking_venue)
+    print('seeking_description: ' + seeking_description)
+    print('image_link: ' + image_link)
+
+    artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres,
+                    facebook_link=facebook_link, website_link=website_link,
+                    seeking_description=seeking_description, image_link=image_link)
     try:
         db.session.add(artist)
         db.session.commit()
