@@ -45,8 +45,7 @@ class Venue(db.Model):
     phone = db.Column(db.String(120))
     website_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    seeking_artists = db.Column(
-        db.Boolean, default=False, nullable=False)
+    seeking_artists = db.Column(db.Boolean(), default=False, nullable=False)
     seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     shows_booked = db.relationship('Show', backref='venueShow', lazy=True)
@@ -65,8 +64,7 @@ class Artist(db.Model):
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
     website_link = db.Column(db.String(500))
-    seeking_venue = db.Column(
-        db.Boolean, default=False, nullable=False)
+    seeking_venue = db.Column(db.Boolean(), default=False, nullable=False)
     seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
@@ -165,10 +163,11 @@ def create_venue_submission():
     image_link = request.form.get('image_link ', '')
 
     # Need to add seeking_artists below
+    print("seeking: " + seeking_artists)
 
     venue = Venue(name=name, city=city, state=state, phone=phone,
                   address=address, genres=genres, facebook_link=facebook_link,
-                  website_link=website_link,
+                  website_link=website_link, seeking_artists=seeking_artists,
                   seeking_description=seeking_description, image_link=image_link)
 
     try:

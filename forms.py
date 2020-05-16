@@ -125,9 +125,18 @@ class VenueForm(Form):
         # TODO implement enum restriction
         'website_link'
     )
-    seeking_artists = BooleanField(
-        'seeking_artists'
-    )
+
+    seeking_artists = SelectField(
+        'state', validators=[DataRequired()],
+        choices=[
+            ('True', 'Yes'),
+            ('False', 'No'),
+        ])
+
+    # seeking_artists = BooleanField(
+    #    'seeking_artists'
+    # )
+
     seeking_description = StringField(
         'seeking_description', validators=[DataRequired()]
     )
@@ -245,6 +254,5 @@ class ArtistForm(Form):
     seeking_description = StringField(
         'seeking_description', validators=[DataRequired()]
     )
-
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
