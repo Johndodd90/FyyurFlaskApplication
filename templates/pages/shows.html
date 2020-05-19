@@ -5,8 +5,8 @@
 
     {%for show in shows %}  
     <div class="col-sm-4">
-        <div class="tile tile-show">
-            <img src="{{ show.artist_image_link }}" alt="Artist Image" />
+        <div class="tile tile-show">        
+            <img src="{{ show.artistShow.image_link }}" alt="Artist Image" />
             <h4>{{ show.show_time }}</h4>
             <h5><a href="/artists/{{ show.artist_id }}">{{ show.artistShow.name }}</a></h5>
             <p>playing at</p>

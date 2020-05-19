@@ -2,7 +2,6 @@
 {% block title %}Venue Search{% endblock %}
 {% block content %}
 
-{% for venue in data %}
 
 <div class="row">
 	<div class="col-sm-6">
@@ -78,22 +77,31 @@
 		{% endfor %}
 	</div>
 </section>
-<section>
-<button class="btn btn-danger delete-button" data-id="{{ venue.id }}">Delete Venue</button>
+
+<section>	
+	 <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete Venue</button>
 </section>
- {% endfor %}
-<script>
-const deleteBtns = document.querySelectorAll('.delete-button');
-  for (let i = 0; i < deleteBtns.length; i++) {
-    const btn = deleteBtns[i];
-    btn.onclick = function(e) {
-      const venueId = e.target.dataset['id'];
-      fetch('/venues/' + venueId, {
-        method: 'DELETE'
-      });
-    }
-  }
-  </script>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Delete Venue?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <form action="{{ url_for('delete_venue', venue_id=venue.id ) }}" method="POST">
+            <input class="btn btn-danger" type="submit" value="Delete">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
 

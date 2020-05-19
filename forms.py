@@ -6,10 +6,10 @@ from wtforms.validators import DataRequired, AnyOf, URL
 
 class ShowForm(Form):
     artist_id = StringField(
-        'artist_id'
+        'artist_id', validators=[DataRequired()]
     )
     venue_id = StringField(
-        'venue_id'
+        'venue_id', validators=[DataRequired()]
     )
     start_time = DateTimeField(
         'start_time',
@@ -86,10 +86,10 @@ class VenueForm(Form):
         'address', validators=[DataRequired()]
     )
     phone = StringField(
-        'phone'
+        'phone', validators=[DataRequired()]
     )
     image_link = StringField(
-        'image_link', validators=[URL()]
+        'image_link'
     )
 
     genres = SelectMultipleField(
@@ -122,20 +122,15 @@ class VenueForm(Form):
     )
 
     website_link = StringField(
-        # TODO implement enum restriction
         'website_link'
     )
 
     seeking_artists = SelectField(
-        'state', validators=[DataRequired()],
+        'seeking_artists', validators=[DataRequired()],
         choices=[
             ('True', 'Yes'),
             ('False', 'No'),
         ])
-
-    # seeking_artists = BooleanField(
-    #    'seeking_artists'
-    # )
 
     seeking_description = StringField(
         'seeking_description', validators=[DataRequired()]
@@ -210,6 +205,7 @@ class ArtistForm(Form):
         # TODO implement validation logic for state
         'phone'
     )
+
     image_link = StringField(
         'image_link'
     )
@@ -248,9 +244,14 @@ class ArtistForm(Form):
         # TODO implement enum restriction
         'website_link'
     )
-    seeking_venue = BooleanField(
-        'seeking_venue'
-    )
+
+    seeking_venue = SelectField(
+        'seeking_venue', validators=[DataRequired()],
+        choices=[
+            ('True', 'Yes'),
+            ('False', 'No'),
+        ])
+
     seeking_description = StringField(
         'seeking_description', validators=[DataRequired()]
     )

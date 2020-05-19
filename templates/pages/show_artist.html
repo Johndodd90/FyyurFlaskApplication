@@ -2,7 +2,6 @@
 {% block title %}{{ artist.name }} | Artist{% endblock %}
 {% block content %}
 
-{% for artist in artist %}
 <div class="row">
 	<div class="col-sm-6">
 		<h1 class="monospace">
@@ -12,9 +11,10 @@
 			ID: {{ artist.id }}
 		</p>
 		<div class="genres">
-			{% for genre in artist.genres %}
+		{% for genre in artist.genres %}
 			<span class="genre">{{ genre }}</span>
 			{% endfor %}
+					
 		</div>
 		<p>
 			<i class="fas fa-globe-americas"></i> {{ artist.city }}, {{ artist.state }}
@@ -73,6 +73,33 @@
 		{% endfor %}
 	</div>
 </section>
-{% endfor %}
+
+<section>	
+	 <button type="button" class="btn btn-danger btn-sm m-1" data-toggle="modal" data-target="#deleteModal">Delete Artist</button>
+</section>
+
+<!-- Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteModalLabel">Delete Artist?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <form action="{{ url_for('delete_artist', artist_id=artist.id ) }}" method="POST">
+            <input class="btn btn-danger" type="submit" value="Delete">
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 {% endblock %}
 
