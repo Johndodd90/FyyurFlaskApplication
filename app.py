@@ -1,7 +1,7 @@
 #----------------------------------------------------------------------------#
 # Imports
 #----------------------------------------------------------------------------#
-
+import enum
 import json
 import dateutil.parser
 import babel
@@ -48,12 +48,19 @@ class Venue(db.Model):
     shows_booked = db.relationship('Show', backref='venueShow', lazy=True)
 
 
+artist_genre = db.Table('artist_genre',
+                        db.Column('artist_id', db.Integer, db.ForeignKey(
+                            'Artist.id'), primary_key=True),
+                        db.Column('genre_id', db.Integer, db.ForeignKey(
+                            'Genre.id'), primary_key=True)
+                        )
+
+
 class Artist(db.Model):
     __tablename__ = 'Artist'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String)
-    genres = db.Column(db.String(120))
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
     phone = db.Column(db.String(120))
@@ -63,6 +70,15 @@ class Artist(db.Model):
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     shows_booked = db.relationship('Show', backref='artistShow', lazy=True)
+    genres = db.relationship('Genre', secondary=artist_genre,
+                             backref=db.backref('genres', lazy=True))
+
+
+class Genre(db.Model):
+    __tablename__ = 'Genre'
+
+    id = db.Column(db.Integer, primary_key=True)
+    genre = db.Column(db.String(30))
 
 
 class Show(db.Model):
@@ -102,9 +118,6 @@ def index():
 
 #  Venues
 #  ----------------------------------------------------------------
-#
-#   To Do add a group by clause for city/state
-#
 @app.route('/venues')
 def venues():
     venues = Venue.query.all()
@@ -248,7 +261,7 @@ def edit_artist_submission(artist_id):
     city = request.form.get('city', '')
     state = request.form.get('state', '')
     phone = request.form.get('phone', '')
-    genres = request.form.get('genres', '')
+    genres = request.form.getlist('genres')
     facebook_link = request.form.get('facebook_link', '')
     website_link = request.form.get('website_link', '')
     seeking_venue = request.form.get('seeking_venue', '')
@@ -256,16 +269,26 @@ def edit_artist_submission(artist_id):
     image_link = request.form.get('image_link', '')
 
     newArtist = Artist(name=name, city=city, state=state, phone=phone,
-                       genres=genres, facebook_link=facebook_link, website_link=website_link,
+                       facebook_link=facebook_link, website_link=website_link,
                        seeking_venue=seeking_venue, seeking_description=seeking_description,
                        image_link=image_link)
+
+    choices = Genre.query.all()
+
     try:
+
         artist = Artist.query.get(artist_id)
+        for genre in genres:
+            genre = Genre(genre=genre)
+            for choice in choices:
+                if genre.genre == choice.genre:
+                    artist.genres.append(choice)
+                    break
+
         artist.name = newArtist.name
         artist.city = newArtist.city
         artist.state = newArtist.state
         artist.phone = newArtist.phone
-        artist.genres = newArtist.genres
         artist.facebook_link = newArtist.facebook_link
         artist.website_link = newArtist.website_link
         artist.seeking_venue = newArtist.seeking_venue
@@ -345,20 +368,30 @@ def create_artist_submission():
     city = request.form.get('city', '')
     state = request.form.get('state', '')
     phone = request.form.get('phone', '')
-    genres = request.form.get('genres', '')
+    genres = request.form.getlist('genres')
     facebook_link = request.form.get('facebook_link', '')
     website_link = request.form.get('website_link', '')
     seeking_venue = request.form.get('seeking_venue', '')
     seeking_description = request.form.get('seeking_description', '')
     image_link = request.form.get('image_link', '')
 
-    artist = Artist(name=name, city=city, state=state, phone=phone, genres=genres,
+    artist = Artist(name=name, city=city, state=state, phone=phone,
                     facebook_link=facebook_link, website_link=website_link, seeking_venue=seeking_venue,
                     seeking_description=seeking_description, image_link=image_link)
+
+    choices = Genre.query.all()
+
     try:
+        for genre in genres:
+            genre = Genre(genre=genre)
+            for choice in choices:
+                if genre.genre == choice.genre:
+                    artist.genres.append(choice)
+                    break
+
         db.session.add(artist)
         db.session.commit()
-        flash('Artist ' + request.form['name'] + ' was successfully listed!')
+        flash('Artist ' + name + ' was successfully listed!')
         return redirect(url_for('index'))
     except:
         db.session.rollback()
