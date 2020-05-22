@@ -29,13 +29,19 @@ migrate = Migrate(app, db)
 # Models.
 #----------------------------------------------------------------------------#
 
+venue_genre = db.Table('venue_genre',
+                       db.Column('venue_id', db.Integer, db.ForeignKey(
+                           'Venue.id'), primary_key=True),
+                       db.Column('genre_id', db.Integer, db.ForeignKey(
+                           'Genre.id'), primary_key=True)
+                       )
+
 
 class Venue(db.Model):
     __tablename__ = 'Venue'
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200))
-    genres = db.Column(db.String(120))
     address = db.Column(db.String(120))
     city = db.Column(db.String(120))
     state = db.Column(db.String(120))
@@ -46,6 +52,8 @@ class Venue(db.Model):
     seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     shows_booked = db.relationship('Show', backref='venueShow', lazy=True)
+    genres = db.relationship('Genre', secondary=venue_genre,
+                             backref=db.backref('Venuegenres', lazy=True))
 
 
 artist_genre = db.Table('artist_genre',
@@ -157,7 +165,7 @@ def create_venue_submission():
     state = request.form.get('state', '')
     address = request.form.get('address', '')
     phone = request.form.get('phone', '')
-    genres = request.form.get('genres', '')
+    genres = request.form.getlist('genres')
     facebook_link = request.form.get('facebook_link', '')
     website_link = request.form.get('website_link', '')
     seeking_artists = request.form.get('seeking_artists', '')
@@ -165,11 +173,20 @@ def create_venue_submission():
     image_link = request.form.get('image_link', '')
 
     venue = Venue(name=name, city=city, state=state, phone=phone,
-                  address=address, genres=genres, facebook_link=facebook_link,
+                  address=address, facebook_link=facebook_link,
                   website_link=website_link, seeking_artists=seeking_artists,
                   seeking_description=seeking_description, image_link=image_link)
 
+    choices = Genre.query.all()
+
     try:
+        for genre in genres:
+            genre = Genre(genre=genre)
+            for choice in choices:
+                if genre.genre == choice.genre:
+                    venue.genres.append(choice)
+                    break
+
         db.session.add(venue)
         db.session.commit()
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
@@ -276,15 +293,7 @@ def edit_artist_submission(artist_id):
     choices = Genre.query.all()
 
     try:
-
         artist = Artist.query.get(artist_id)
-        for genre in genres:
-            genre = Genre(genre=genre)
-            for choice in choices:
-                if genre.genre == choice.genre:
-                    artist.genres.append(choice)
-                    break
-
         artist.name = newArtist.name
         artist.city = newArtist.city
         artist.state = newArtist.state
@@ -294,6 +303,15 @@ def edit_artist_submission(artist_id):
         artist.seeking_venue = newArtist.seeking_venue
         artist.seeking_description = newArtist.seeking_description
         artist.image_link = newArtist.image_link
+        artist.genres.clear()
+
+        for genre in genres:
+            genre = Genre(genre=genre)
+            for choice in choices:
+                if genre.genre == choice.genre:
+                    artist.genres.append(choice)
+                    break
+
         db.session.commit()
         flash('Artist was successfully modified ')
     except:
