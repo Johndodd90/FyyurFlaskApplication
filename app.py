@@ -51,7 +51,8 @@ class Venue(db.Model):
     seeking_artists = db.Column(db.String(6), default=False, nullable=False)
     seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
-    shows_booked = db.relationship('Show', backref='venueShow', lazy=True)
+    shows_booked = db.relationship(
+        'Show', cascade='all, delete-orphan', backref='venueShow', lazy=True)
     genres = db.relationship('Genre', secondary=venue_genre,
                              backref=db.backref('Venuegenres', lazy=True))
 
@@ -77,7 +78,8 @@ class Artist(db.Model):
     seeking_description = db.Column(db.String(500))
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
-    shows_booked = db.relationship('Show', backref='artistShow', lazy=True)
+    shows_booked = db.relationship(
+        'Show', cascade='all, delete-orphan', backref='artistShow', lazy=True)
     genres = db.relationship('Genre', secondary=artist_genre,
                              backref=db.backref('genres', lazy=True))
 
@@ -129,7 +131,7 @@ def index():
 @app.route('/venues')
 def venues():
     venues = Venue.query.all()
-    areas = Venue.query.order_by(Venue.state)
+    areas = Venue.query.with_entities(Venue.city, Venue.state).distinct().all()
     return render_template('pages/venues.html', venues=venues, areas=areas)
 
 #  Search Venues
@@ -338,7 +340,7 @@ def edit_venue_submission(venue_id):
     state = request.form.get('state', '')
     address = request.form.get('address', '')
     phone = request.form.get('phone', '')
-    genres = request.form.get('genres', '')
+    genres = request.form.getlist('genres')
     facebook_link = request.form.get('facebook_link', '')
     website_link = request.form.get('website_link', '')
     seeking_artists = request.form.get('seeking_artists', '')
@@ -346,9 +348,11 @@ def edit_venue_submission(venue_id):
     image_link = request.form.get('image_link', '')
 
     newVenue = Venue(name=name, city=city, state=state, phone=phone,
-                     genres=genres, facebook_link=facebook_link, website_link=website_link,
+                     facebook_link=facebook_link, website_link=website_link,
                      seeking_artists=seeking_artists, seeking_description=seeking_description,
                      image_link=image_link)
+
+    choices = Genre.query.all()
 
     try:
         venue = Venue.query.get(venue_id)
@@ -362,6 +366,12 @@ def edit_venue_submission(venue_id):
         venue.seeking_artists = newVenue.seeking_artists
         venue.seeking_description = newVenue.seeking_description
         venue.image_link = newVenue.image_link
+        for genre in genres:
+            genre = Genre(genre=genre)
+            for choice in choices:
+                if genre.genre == choice.genre:
+                    venue.genres.append(choice)
+                    break
         db.session.commit()
         flash('Venue was successfully modified ')
     except:
